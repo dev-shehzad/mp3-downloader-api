@@ -24,6 +24,7 @@ try {
  */
 function getYtDlpPath() {
   if (fs.existsSync(YTDLP_PATH)) return YTDLP_PATH;
+  if (fs.existsSync('/usr/local/bin/yt-dlp')) return '/usr/local/bin/yt-dlp';
   return 'yt-dlp'; // fallback to system PATH (Docker / Cloud)
 }
 

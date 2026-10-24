@@ -54,10 +54,10 @@ app.use('/download', express.static(TEMP_DIR));
 
 // Health checks
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', message: 'MP3 Downloader Backend Running', version: '1.0.1' });
+  res.json({ status: 'ok', message: 'MP3 Downloader Backend Running', version: '1.0.2' });
 });
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'MP3 Downloader Backend Running', version: '1.0.1' });
+  res.json({ status: 'ok', message: 'MP3 Downloader Backend Running', version: '1.0.2' });
 });
 
 // Cleanup old temp files every 30 minutes
