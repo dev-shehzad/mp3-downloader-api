@@ -3,4 +3,5 @@ temp
 bin/*.exe
 .env
 *.log
+node.exe
 .DS_Store
