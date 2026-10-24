@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mp3-downloader-backend
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /health
