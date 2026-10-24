@@ -74,7 +74,7 @@ router.get('/info', async (req, res) => {
     }
   } catch (err) {
     console.error('YouTube info error:', err.message);
-    res.status(500).json({ error: 'Failed to fetch video info.' });
+    res.status(500).json({ error: err.message || 'Failed to fetch video info.' });
   }
 });
 
