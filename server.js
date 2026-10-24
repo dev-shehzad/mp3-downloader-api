@@ -52,7 +52,10 @@ app.use('/api/soundcloud', soundcloudRouter);
 // Serve temp files for download
 app.use('/download', express.static(TEMP_DIR));
 
-// Health check
+// Health checks
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'MP3 Downloader Backend Running', version: '1.0.0' });
+});
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'MP3 Downloader Backend Running', version: '1.0.0' });
 });
