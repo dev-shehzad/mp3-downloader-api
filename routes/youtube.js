@@ -3,15 +3,24 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const ytDlpExec = require('yt-dlp-exec');
+const { create: createYtDlp } = require('yt-dlp-exec');
 const { addID3Tags, TEMP_DIR, FFMPEG_PATH, getYtDlpPath } = require('../utils/helpers');
 
-// Create yt-dlp caller that uses our bundled binary
+// Create yt-dlp runner with proper binary path
+let ytDlpRunner;
+function getYtRunner() {
+  if (!ytDlpRunner) {
+    const bin = getYtDlpPath();
+    ytDlpRunner = bin === 'yt-dlp' ? require('yt-dlp-exec') : createYtDlp(bin);
+  }
+  return ytDlpRunner;
+}
+
 function ytDlp(url, options) {
-  return ytDlpExec(url, {
+  const runner = getYtRunner();
+  return runner(url, {
     ...options,
-    binaryPath: getYtDlpPath(),
-    ...(FFMPEG_PATH !== 'ffmpeg' ? { ffmpegLocation: path.dirname(FFMPEG_PATH) } : {})
+    ...(FFMPEG_PATH && FFMPEG_PATH !== 'ffmpeg' ? { ffmpegLocation: path.dirname(FFMPEG_PATH) } : {})
   });
 }
 
