@@ -43,7 +43,7 @@ router.get('/info', async (req, res) => {
       noWarnings: true,
       noCheckCertificates: true,
       preferFreeFormats: true,
-      extractorArgs: 'youtube:player_client=android,web',
+      extractorArgs: 'youtube:player_client=android',
       noPlaylist: !isPlaylist,
     });
 
@@ -106,7 +106,7 @@ router.all('/download', async (req, res) => {
       postprocessorArgs: 'ffmpeg:-b:a 320k -ar 44100',
       noWarnings: true,
       noCheckCertificates: true,
-      extractorArgs: 'youtube:player_client=android,web',
+      extractorArgs: 'youtube:player_client=android',
       noPlaylist: true,
     });
 
@@ -141,7 +141,7 @@ router.get('/search-page', async (req, res) => {
       flatPlaylist: true,
       noWarnings: true,
       noCheckCertificates: true,
-      extractorArgs: 'youtube:player_client=android,web',
+      extractorArgs: 'youtube:player_client=android',
       playlistEnd: 200,
     });
 
