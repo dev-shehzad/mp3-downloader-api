@@ -13,18 +13,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
     && chmod a+rx /usr/local/bin/yt-dlp
 
-WORKDIR /app
+# Set up standard non-root user (compatible with Hugging Face Spaces, Render, and standard Docker)
+RUN useradd -m -u 1000 user
+USER user
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH
+
+WORKDIR /home/user/app
 
 # Install npm dependencies
-COPY package*.json ./
+COPY --chown=user package*.json ./
 RUN npm install --omit=dev
 
 # Copy application source
-COPY . .
+COPY --chown=user . .
 
-# Environment
-ENV PORT=3001
+# Environment (7860 is default for Hugging Face, or uses process.env.PORT)
+ENV PORT=7860
 ENV NODE_ENV=production
-EXPOSE 3001
+EXPOSE 7860
 
 CMD ["node", "server.js"]

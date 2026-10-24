@@ -20,7 +20,7 @@ setup().then(startServer).catch(err => {
 function startServer() {
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 7860;
 
 // Create temp directory for downloads
 const TEMP_DIR = path.join(__dirname, 'temp');
