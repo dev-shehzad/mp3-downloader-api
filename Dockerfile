@@ -1,13 +1,20 @@
 FROM node:20-bookworm-slim
 
-# Install system dependencies: Python3, python-is-python3 symlink, FFmpeg, curl, ca-certificates
+# Install system dependencies: Python3, python-is-python3 symlink, FFmpeg, curl, unzip, ca-certificates
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python-is-python3 \
     ffmpeg \
     curl \
+    unzip \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Deno (recommended JS runtime for yt-dlp JS challenges)
+ENV DENO_INSTALL=/root/.deno
+ENV PATH="${DENO_INSTALL}/bin:${PATH}"
+RUN curl -fsSL https://deno.land/install.sh | sh \
+    && ln -sf /root/.deno/bin/deno /usr/local/bin/deno
 
 # Ensure python symlink exists for yt-dlp-exec
 RUN ln -sf /usr/bin/python3 /usr/bin/python

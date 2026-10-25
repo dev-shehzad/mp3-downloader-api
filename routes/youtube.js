@@ -28,7 +28,8 @@ function ytDlp(url, options) {
   const runner = getYtRunner();
   const cookies = getCookiesPath();
   return runner(url, {
-    jsRuntimes: 'node',
+    jsRuntimes: 'deno,node',
+    remoteComponents: 'ejs:github',
     ...options,
     ...(FFMPEG_PATH && FFMPEG_PATH !== 'ffmpeg' ? { ffmpegLocation: path.dirname(FFMPEG_PATH) } : {}),
     ...(cookies ? { cookies } : {})
