@@ -64,11 +64,23 @@ app.use('/api/soundcloud', soundcloudRouter);
 app.use('/download', express.static(TEMP_DIR));
 
 // Health checks
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', message: 'MP3 Downloader Backend Running', version: '1.0.2' });
-});
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'MP3 Downloader Backend Running', version: '1.0.2' });
+app.get(['/', '/health'], (req, res) => {
+  const cookiesPath = path.join(__dirname, 'cookies.txt');
+  const hasCookies = fs.existsSync(cookiesPath) && fs.statSync(cookiesPath).size > 100;
+  let hasDeno = false;
+  try {
+    const { execSync } = require('child_process');
+    execSync('deno --version', { stdio: 'ignore' });
+    hasDeno = true;
+  } catch (e) {}
+
+  res.json({
+    status: 'ok',
+    message: 'MP3 Downloader Backend Running',
+    version: '1.0.3',
+    hasCookies,
+    hasDeno
+  });
 });
 
 // Cleanup old temp files every 30 minutes
