@@ -17,6 +17,8 @@ function getYtRunner() {
 }
 
 function getCookiesPath() {
+  const secretPath = '/etc/secrets/cookies.txt';
+  if (fs.existsSync(secretPath)) return secretPath;
   const directPath = path.join(__dirname, '..', 'cookies.txt');
   if (fs.existsSync(directPath)) return directPath;
   const rootPath = path.join(process.cwd(), 'cookies.txt');
@@ -28,11 +30,12 @@ function ytDlp(url, options) {
   const runner = getYtRunner();
   const cookies = getCookiesPath();
   return runner(url, {
+    forceIpv4: true,
     jsRuntimes: 'deno,node',
     remoteComponents: 'ejs:github',
     ...options,
     ...(FFMPEG_PATH && FFMPEG_PATH !== 'ffmpeg' ? { ffmpegLocation: path.dirname(FFMPEG_PATH) } : {}),
-    ...(cookies ? { cookies } : {})
+    ...(cookies ? { cookies, extractorArgs: 'youtube:player_client=web,mweb,ios' } : { extractorArgs: 'youtube:player_client=android' })
   });
 }
 
@@ -61,7 +64,6 @@ router.get('/info', async (req, res) => {
       noWarnings: true,
       noCheckCertificates: true,
       preferFreeFormats: true,
-      ...(getCookiesPath() ? {} : { extractorArgs: 'youtube:player_client=android' }),
       ...(isPlaylist ? { yesPlaylist: true } : { noPlaylist: true }),
     });
 
@@ -128,7 +130,6 @@ router.all('/download', async (req, res) => {
       postprocessorArgs: 'ffmpeg:-b:a 320k -ar 44100 -threads 0',
       noWarnings: true,
       noCheckCertificates: true,
-      ...(getCookiesPath() ? {} : { extractorArgs: 'youtube:player_client=android' }),
       noPlaylist: true,
       concurrentFragments: 5,
     });
@@ -171,7 +172,6 @@ router.get('/search-page', async (req, res) => {
       flatPlaylist: true,
       noWarnings: true,
       noCheckCertificates: true,
-      ...(getCookiesPath() ? {} : { extractorArgs: 'youtube:player_client=android' }),
       playlistEnd: 200,
     });
 

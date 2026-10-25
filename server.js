@@ -32,8 +32,15 @@ if (!fs.existsSync(TEMP_DIR)) {
 if (process.env.YOUTUBE_COOKIES) {
   try {
     const cookiesDest = path.join(__dirname, 'cookies.txt');
-    fs.writeFileSync(cookiesDest, process.env.YOUTUBE_COOKIES.trim(), 'utf8');
-    console.log('🍪 Loaded YouTube cookies from environment variable');
+    let cookieContent = process.env.YOUTUBE_COOKIES
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .trim();
+    // Only write if it contains valid cookie tokens
+    if (cookieContent.includes('youtube.com') || cookieContent.includes('Netscape')) {
+      fs.writeFileSync(cookiesDest, cookieContent, 'utf8');
+      console.log('🍪 Loaded YouTube cookies from environment variable');
+    }
   } catch (e) {
     console.error('Failed to write cookies from env:', e.message);
   }
@@ -66,7 +73,18 @@ app.use('/download', express.static(TEMP_DIR));
 // Health checks
 app.get(['/', '/health'], (req, res) => {
   const cookiesPath = path.join(__dirname, 'cookies.txt');
-  const hasCookies = fs.existsSync(cookiesPath) && fs.statSync(cookiesPath).size > 100;
+  let cookieStats = { exists: false, size: 0, lines: 0, hasTabs: false, isNetscape: false };
+  if (fs.existsSync(cookiesPath)) {
+    const raw = fs.readFileSync(cookiesPath, 'utf8');
+    cookieStats = {
+      exists: true,
+      size: raw.length,
+      lines: raw.split('\n').filter(l => l.trim()).length,
+      hasTabs: raw.includes('\t'),
+      isNetscape: raw.includes('Netscape') || raw.includes('.youtube.com')
+    };
+  }
+
   let hasDeno = false;
   try {
     const { execSync } = require('child_process');
@@ -77,8 +95,8 @@ app.get(['/', '/health'], (req, res) => {
   res.json({
     status: 'ok',
     message: 'MP3 Downloader Backend Running',
-    version: '1.0.3',
-    hasCookies,
+    version: '1.0.4',
+    cookieStats,
     hasDeno
   });
 });
