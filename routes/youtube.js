@@ -18,7 +18,16 @@ function getYtRunner() {
 
 function getCookiesPath() {
   const secretPath = '/etc/secrets/cookies.txt';
-  if (fs.existsSync(secretPath)) return secretPath;
+  const tempCookies = path.join(TEMP_DIR, 'cookies.txt');
+  if (fs.existsSync(secretPath)) {
+    try {
+      if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
+      fs.copyFileSync(secretPath, tempCookies);
+      return tempCookies;
+    } catch (e) {
+      console.error('Failed to copy secret cookies:', e.message);
+    }
+  }
   const directPath = path.join(__dirname, '..', 'cookies.txt');
   if (fs.existsSync(directPath)) return directPath;
   const rootPath = path.join(process.cwd(), 'cookies.txt');
@@ -35,7 +44,7 @@ function ytDlp(url, options) {
     remoteComponents: 'ejs:github',
     ...options,
     ...(FFMPEG_PATH && FFMPEG_PATH !== 'ffmpeg' ? { ffmpegLocation: path.dirname(FFMPEG_PATH) } : {}),
-    ...(cookies ? { cookies, extractorArgs: 'youtube:player_client=web,mweb,ios' } : { extractorArgs: 'youtube:player_client=android' })
+    ...(cookies ? { cookies } : { extractorArgs: 'youtube:player_client=android' })
   });
 }
 
