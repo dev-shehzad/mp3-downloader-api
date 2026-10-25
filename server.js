@@ -95,7 +95,7 @@ app.get(['/', '/health'], (req, res) => {
   res.json({
     status: 'ok',
     message: 'MP3 Downloader Backend Running',
-    version: '1.0.5',
+    version: '1.0.6',
     cookieStats,
     hasDeno
   });
