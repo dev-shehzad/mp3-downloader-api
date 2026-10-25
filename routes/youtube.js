@@ -218,4 +218,26 @@ router.get('/search-page', async (req, res) => {
   }
 });
 
+// Diagnostic endpoint to test client combinations on Render
+router.get('/test', async (req, res) => {
+  const { client = 'android', useCookies = 'false' } = req.query;
+  const runner = getYtRunner();
+  const cookies = useCookies === 'true' ? getCookiesPath() : null;
+  try {
+    const info = await runner('https://www.youtube.com/watch?v=OYulLKcdmFA', {
+      dumpSingleJson: true,
+      noWarnings: true,
+      noCheckCertificates: true,
+      jsRuntimes: 'deno,node',
+      remoteComponents: 'ejs:github',
+      forceIpv4: true,
+      ...(cookies ? { cookies } : {}),
+      extractorArgs: `youtube:player_client=${client}`
+    });
+    res.json({ success: true, client, useCookies, title: info.title, formatsCount: info.formats?.length });
+  } catch (err) {
+    res.status(500).json({ success: false, client, useCookies, error: err.message });
+  }
+});
+
 module.exports = router;
