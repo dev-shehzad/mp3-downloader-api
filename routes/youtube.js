@@ -18,20 +18,30 @@ function getYtRunner() {
 
 function getCookiesPath() {
   const secretPath = '/etc/secrets/cookies.txt';
+  const directPath = path.join(__dirname, '..', 'cookies.txt');
+  const rootPath = path.join(process.cwd(), 'cookies.txt');
   const tempCookies = path.join(TEMP_DIR, 'cookies.txt');
+
+  let chosenPath = null;
+  if (fs.existsSync(directPath)) chosenPath = directPath;
+  else if (fs.existsSync(rootPath)) chosenPath = rootPath;
+
+  // If secretPath exists and is newer than chosenPath, use secretPath
   if (fs.existsSync(secretPath)) {
-    try {
-      if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
-      fs.copyFileSync(secretPath, tempCookies);
-      return tempCookies;
-    } catch (e) {
-      console.error('Failed to copy secret cookies:', e.message);
+    if (!chosenPath || fs.statSync(secretPath).mtimeMs > fs.statSync(chosenPath).mtimeMs) {
+      chosenPath = secretPath;
     }
   }
-  const directPath = path.join(__dirname, '..', 'cookies.txt');
-  if (fs.existsSync(directPath)) return directPath;
-  const rootPath = path.join(process.cwd(), 'cookies.txt');
-  if (fs.existsSync(rootPath)) return rootPath;
+
+  if (chosenPath) {
+    try {
+      if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
+      fs.copyFileSync(chosenPath, tempCookies);
+      return tempCookies;
+    } catch (e) {
+      return chosenPath;
+    }
+  }
   return null;
 }
 
