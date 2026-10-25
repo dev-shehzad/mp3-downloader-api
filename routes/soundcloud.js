@@ -86,27 +86,36 @@ router.all('/download', async (req, res) => {
 
   try {
     await ytDlp(url, {
+      format: 'bestaudio/best',
       output: outputPath,
       extractAudio: true,
       audioFormat: 'mp3',
       audioQuality: '0',
-      postprocessorArgs: 'ffmpeg:-b:a 320k -ar 44100',
+      postprocessorArgs: 'ffmpeg:-b:a 320k -ar 44100 -threads 0',
       noWarnings: true,
       noCheckCertificates: true,
+      concurrentFragments: 5,
     });
 
     if (fs.existsSync(outputPath)) {
       await addID3Tags(outputPath, { title: safeTitle, artist: uploader, thumbnail, genre });
     }
 
+    const stat = fs.statSync(outputPath);
     const filename = encodeURIComponent(`${safeTitle}.mp3`);
     res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${filename}`);
     res.setHeader('Content-Type', 'audio/mpeg');
+    res.setHeader('Content-Length', stat.size);
+    res.setHeader('Accept-Ranges', 'bytes');
 
     const stream = fs.createReadStream(outputPath);
     stream.pipe(res);
     stream.on('end', () => { try { fs.unlinkSync(outputPath); } catch (e) {} });
     stream.on('error', () => { try { fs.unlinkSync(outputPath); } catch (e) {} });
+    res.on('close', () => {
+      try { stream.destroy(); } catch (e) {}
+      if (fs.existsSync(outputPath)) { try { fs.unlinkSync(outputPath); } catch (e) {} }
+    });
 
   } catch (err) {
     console.error('SoundCloud download error:', err.message);

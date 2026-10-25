@@ -28,6 +28,17 @@ if (!fs.existsSync(TEMP_DIR)) {
   fs.mkdirSync(TEMP_DIR, { recursive: true });
 }
 
+// Auto-write cookies from environment variable if provided on Render
+if (process.env.YOUTUBE_COOKIES) {
+  try {
+    const cookiesDest = path.join(__dirname, 'cookies.txt');
+    fs.writeFileSync(cookiesDest, process.env.YOUTUBE_COOKIES.trim(), 'utf8');
+    console.log('🍪 Loaded YouTube cookies from environment variable');
+  } catch (e) {
+    console.error('Failed to write cookies from env:', e.message);
+  }
+}
+
 // Middleware
 app.use(cors({
   origin: true,
